@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+ const baseUrl = import.meta.env.VITE_API_BASE_URL;
 export default function ChangePassword() {
+   
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -22,7 +23,7 @@ export default function ChangePassword() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/admins/change-password",
+        `${baseUrl}/api/admins/change-password`,
         {
           currentPassword,
           newPassword,
@@ -41,58 +42,73 @@ export default function ChangePassword() {
     }
   };
 
-  return (
-    <div className="container mt-5" style={{ maxWidth: "500px" }}>
-      <h3 className="mb-4 text-center">Change Password</h3>
-      {message && <div className="alert alert-success">{message}</div>}
-      {error && <div className="alert alert-danger">{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label htmlFor="currentPassword" className="form-label">
-            Current Password
-          </label>
-          <input
-            type="password"
-            className="form-control"
-            id="currentPassword"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            required
-          />
-        </div>
+ return (
+  <div className="max-w-md mx-auto mt-10 px-4">
+    <h3 className="text-xl font-semibold text-center mb-6">Change Password</h3>
 
-        <div className="mb-3">
-          <label htmlFor="newPassword" className="form-label">
-            New Password
-          </label>
-          <input
-            type="password"
-            className="form-control"
-            id="newPassword"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-        </div>
+    {message && (
+      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        {message}
+      </div>
+    )}
+    {error && (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {error}
+      </div>
+    )}
 
-        <div className="mb-3">
-          <label htmlFor="confirmNewPassword" className="form-label">
-            Confirm New Password
-          </label>
-          <input
-            type="password"
-            className="form-control"
-            id="confirmNewPassword"
-            value={confirmNewPassword}
-            onChange={(e) => setConfirmNewPassword(e.target.value)}
-            required
-          />
-        </div>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div>
+        <label htmlFor="currentPassword" className="block font-medium mb-1">
+          Current Password
+        </label>
+        <input
+          type="password"
+          id="currentPassword"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          required
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
 
-        <button type="submit" disabled={loading} className="btn btn-success w-100">
-          {loading ? "Updating..." : "Update Password"}
-        </button>
-      </form>
-    </div>
-  );
+      <div>
+        <label htmlFor="newPassword" className="block font-medium mb-1">
+          New Password
+        </label>
+        <input
+          type="password"
+          id="newPassword"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="confirmNewPassword" className="block font-medium mb-1">
+          Confirm New Password
+        </label>
+        <input
+          type="password"
+          id="confirmNewPassword"
+          value={confirmNewPassword}
+          onChange={(e) => setConfirmNewPassword(e.target.value)}
+          required
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? "Updating..." : "Update Password"}
+      </button>
+    </form>
+  </div>
+);
+
 }

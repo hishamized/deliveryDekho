@@ -1,87 +1,66 @@
-// src/components/Header.jsx
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+ const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
-const Header = () => {
-  const [admin, setAdmin] = useState(null);
+const Header = ({ admin, rider, setAdmin, setRider }) => {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkAdminSession = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/admins/check-session', {
-          withCredentials: true,
-        });
-
-        if (response.data.loggedIn) {
-          setAdmin(response.data.admin);
-        }
-      } catch (error) {
-        console.error('Session check failed', error);
-      }
-    };
-
-    checkAdminSession();
-  }, []);
 
   const handleLogout = async () => {
     try {
-      await axios.post('http://localhost:5000/api/admins/logout', {}, { withCredentials: true });
-      setAdmin(null);
-      navigate('/');
+      if (admin) {
+        await axios.post(`${baseUrl}/api/admins/logout`, {}, { withCredentials: true });
+        setAdmin(null);
+      } else if (rider) {
+        await axios.post(`${baseUrl}/api/riders/logout`, {}, { withCredentials: true });
+        setRider(null);
+      }
+      navigate("/");
     } catch (err) {
-      console.error('Logout failed:', err);
+      console.error("Logout failed" + err);
     }
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-success">
-      <div className="container">
-        <Link className="navbar-brand" to="/">Delivery Dekho</Link>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-            {/* <li className="nav-item"><Link className="nav-link" to="#">Home</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="#">About</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="#">Services</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="#">Projects</Link></li>
-            <li className="nav-item"><Link className="nav-link" to="#">Contact</Link></li> */}
-            {admin ? (
-              <>
-                <li className="nav-item">
-                  <button
-                    className="btn btn-outline-light btn-sm"
-                    onClick={handleLogout}
-                  >
-                    Logout
+    <nav className="bg-gray-800 text-white px-4 py-3">
+      <div className="flex items-center justify-between max-w-7xl mx-auto">
+        <Link to="/" className="text-xl font-semibold">Delivery Dekho</Link>
+        <ul className="flex items-center space-x-4">
+          {(() => {
+            if (admin) {
+              return (
+                <li>
+                  <button onClick={handleLogout} className="px-3 py-1 text-sm rounded bg-gray-700 hover:bg-gray-600 transition">
+                    Logout ({admin.name})
                   </button>
                 </li>
-              </>
-            ) : (
-              <>
-                <li className="nav-item"><Link className="nav-link" href="#"
-                 onClick={ (e) => {
-                   e.preventDefault();
-                   navigate('/admin/AdminDashboard');
-                 } }>Admin</Link>
-                 </li>
-                <li className="nav-item"><Link className="nav-link" href="#" onClick={ (e) => {
-                   e.preventDefault();
-                   navigate('/rider/RiderDashboard');
-                 } }>Rider</Link></li>
-              </>
-            )}
-          </ul>
-        </div>
+              );
+            } else if (rider) {
+              return (
+                <li>
+                  <button onClick={handleLogout} className="px-3 py-1 text-sm rounded bg-gray-700 hover:bg-gray-600 transition">
+                    Logout ({rider.name})
+                  </button>
+                </li>
+              );
+            } else {
+              return (
+                <>
+                  <li>
+                    <Link to="/admin/AdminDashboard" className="hover:text-gray-300 transition">
+                      Admin
+                    </Link>
+                  </li>
+                  <li>
+                    <a href="#" onClick={(e) => { e.preventDefault(); navigate("/rider/RiderDashboard"); }} className="hover:text-gray-300 transition">
+                      Rider
+                    </a>
+                  </li>
+                </>
+              );
+            }
+          })()}
+        </ul>
       </div>
     </nav>
   );

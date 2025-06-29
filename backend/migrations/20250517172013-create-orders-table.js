@@ -14,6 +14,14 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.UUIDV4,
       },
+      sender_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      receiver_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       source_address: {
         type: Sequelize.TEXT,
         allowNull: false,

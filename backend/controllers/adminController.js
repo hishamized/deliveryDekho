@@ -2,6 +2,7 @@ const db = require("../models");
 const bcrypt = require("bcrypt");
 const path = require('path');
 const fs = require('fs');
+const deadline = require("../models/deadline");
 
 
 const Admin = db.Admin;
@@ -469,7 +470,11 @@ exports.deleteRider = async (req, res) => {
 
 
 exports.placeOrder = async (req, res) => {
+  console.log("📥 Full req.body:", req.body);
+
   const {
+    sender_name,
+    receiver_name,
     source_address,
     dest_address,
     phone_sender,
@@ -482,6 +487,8 @@ exports.placeOrder = async (req, res) => {
   } = req.body;
 
   if (
+    !sender_name ||
+    !receiver_name ||
     !source_address ||
     !dest_address ||
     !phone_sender ||
@@ -502,20 +509,25 @@ exports.placeOrder = async (req, res) => {
 
   try {
     const newOrder = await db.Order.create({
+      sender_name,
+      receiver_name,
       source_address,
       dest_address,
       phone_sender,
       phone_receiver,
       send_otp,
       assigned_rider_id: assigned_rider_id || null,
+      assigned_time: new Date(), 
       customer_deadline: customer_deadline || null,
     }, { transaction: t });
+
+    console.log("📅 deadline_expire_time:", deadline_expire_time);
 
     const newDeadline = await db.Deadline.create({
       order_id: newOrder.id,
       deadline_type: deadline_type || 'pickup',
       status: 'pending',
-      deadline_expire_time: deadline_expire_time || new Date(Date.now() + 3 * 60 * 60 * 1000),
+      deadline_expire_time: deadline_expire_time ? new Date(deadline_expire_time) : null,
     }, { transaction: t });
 
     await t.commit(); 
@@ -722,6 +734,44 @@ exports.updateOrder = async (req, res) => {
     });
   }
 }
+
+exports.getDeadlines = async (req, res) => {
+  try {
+const deadlines = await db.Deadline.findAll({
+  where: { status: 'missed' },
+  order: [['created_at', 'DESC']]
+});
+
+
+    if (!deadlines.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No missed deadlines found."
+      });
+    }
+
+    await Promise.all(deadlines.map(dl => {
+  dl.notified = true;
+  return dl.save();
+}));
+
+
+    return res.status(200).json({
+      success: true,
+      message: "Missed deadlines retrieved and marked as notified.",
+      deadlines
+    });
+
+  } catch (error) {
+    console.error("Error fetching deadlines:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching deadlines.",
+      error: error.message || "Internal Server Error"
+    });
+  }
+};
+
 
 
 

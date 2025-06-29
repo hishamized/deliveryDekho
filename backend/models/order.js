@@ -14,6 +14,14 @@ module.exports = (sequelize) => {
       allowNull: false,
       defaultValue: DataTypes.UUIDV4,
     },
+    sender_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    receiver_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     source_address: {
       type: DataTypes.TEXT,
       allowNull: false,

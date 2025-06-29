@@ -1,13 +1,15 @@
 // src/pages/admin/adminDashboard/PlaceOrder.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
 const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString(); 
+  return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-
-const PlaceOrder = () => {;
+const PlaceOrder = () => {
+  
+  const [senderName, setSenderName] = useState("");
+  const [receiverName, setReceiverName] = useState("");
   const [sourceAddress, setSourceAddress] = useState("");
   const [destAddress, setDestAddress] = useState("");
   const [phoneSender, setPhoneSender] = useState("");
@@ -15,14 +17,14 @@ const PlaceOrder = () => {;
   const [sendOtp, setSendOtp] = useState(generateOTP()); // Generate OTP once
   const [assignedRiderId, setAssignedRiderId] = useState("");
   const [customerDeadline, setCustomerDeadline] = useState("");
-  const [deadline_type, setDeadlineType] = useState(""); 
+  const [deadline_type, setDeadlineType] = useState("");
   const [deadline_expire_time, setDeadlineExpireTime] = useState("");
   const [riders, setRiders] = useState([]);
 
   useEffect(() => {
     // Fetch all riders from API
     axios
-      .get("http://localhost:5000/api/admins/riders", {withCredentials: true})
+      .get(`${baseUrl}/api/admins/riders`, { withCredentials: true })
       .then((response) => {
         console.log("Fetched riders:", response.data);
         setRiders(response.data.riders || []);
@@ -34,15 +36,22 @@ const PlaceOrder = () => {;
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:5000/api/admins/placeOrder", {
-        source_address: sourceAddress,
-        dest_address: destAddress,
-        phone_sender: phoneSender,
-        phone_receiver: phoneReceiver,
-        send_otp: sendOtp,
-        assigned_rider_id: assignedRiderId || null,
-        customer_deadline: customerDeadline,
-      }, {withCredentials: true});
+      const response = await axios.post(
+        `${baseUrl}/api/admins/placeOrder`,
+        {
+          sender_name: senderName,
+          receiver_name: receiverName,
+          source_address: sourceAddress,
+          dest_address: destAddress,
+          phone_sender: phoneSender,
+          phone_receiver: phoneReceiver,
+          send_otp: sendOtp,
+          assigned_rider_id: assignedRiderId || null,
+          customer_deadline: customerDeadline,
+          deadline_expire_time: deadline_expire_time,
+        },
+        { withCredentials: true }
+      );
 
       if (response.data.success) {
         alert("Order placed successfully!");
@@ -62,62 +71,105 @@ const PlaceOrder = () => {;
   };
 
   return (
-    <div className="container mt-4">
-      <h2>Place New Order</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label>Source Address</label>
+    <div className="max-w-3xl mx-auto px-4 mt-6">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+        Place New Order
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Sender Name
+          </label>
           <textarea
-            className="form-control"
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-400"
+            value={senderName}
+            onChange={(e) => setSenderName(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Receiver Name
+          </label>
+          <textarea
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-400"
+            value={receiverName}
+            onChange={(e) => setReceiverName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Source Address
+          </label>
+          <textarea
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-400"
             value={sourceAddress}
             onChange={(e) => setSourceAddress(e.target.value)}
             required
           />
         </div>
-        <div className="mb-3">
-          <label>Destination Address</label>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Destination Address
+          </label>
           <textarea
-            className="form-control"
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-400"
             value={destAddress}
             onChange={(e) => setDestAddress(e.target.value)}
             required
           />
         </div>
-        <div className="mb-3">
-          <label>Sender Phone</label>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Sender Phone
+          </label>
           <input
             type="tel"
-            className="form-control"
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-400"
             value={phoneSender}
             onChange={(e) => setPhoneSender(e.target.value)}
             required
           />
         </div>
-        <div className="mb-3">
-          <label>Send OTP</label>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Send OTP
+          </label>
           <input
             type="text"
-            className="form-control"
+            disabled
+            className="w-full bg-gray-100 border border-gray-300 rounded-md p-2"
             value={sendOtp}
             onChange={(e) => setSendOtp(e.target.value)}
             required
-            disabled
           />
         </div>
-        <div className="mb-3">
-          <label>Receiver Phone</label>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Receiver Phone
+          </label>
           <input
             type="tel"
-            className="form-control"
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-400"
             value={phoneReceiver}
             onChange={(e) => setPhoneReceiver(e.target.value)}
             required
           />
         </div>
-        <div className="mb-3">
-          <label>Assign to Rider</label>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Assign to Rider
+          </label>
           <select
-            className="form-select"
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-400"
             value={assignedRiderId}
             onChange={(e) => setAssignedRiderId(e.target.value)}
           >
@@ -129,39 +181,56 @@ const PlaceOrder = () => {;
             ))}
           </select>
         </div>
-        <div className="mb-3">
-          <label>Delivery Deadline As Per Customer</label>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Delivery Deadline As Per Customer
+          </label>
           <input
             type="datetime-local"
-            className="form-control"
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-400"
             value={customerDeadline}
             onChange={(e) => setCustomerDeadline(e.target.value)}
             required
           />
         </div>
-        <div className="mb-3">
-          <label>Deadline Type</label>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Deadline Type
+          </label>
           <select
-            className="form-select"
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-400"
             value={deadline_type}
             onChange={(e) => setDeadlineType(e.target.value)}
           >
             <option value="">Select Deadline Type</option>
-            <option value="pickup" default >Pickup</option>
-            <option value="delivery" disabled>Delivery</option>
+            <option value="pickup">Pickup</option>
+            <option value="delivery" disabled>
+              Delivery
+            </option>
           </select>
         </div>
-        <div className="mb-3">
-          <label>Pickup Deadline Expire Time</label>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Pickup Deadline Expire Time
+          </label>
           <input
             type="datetime-local"
-            className="form-control"
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring focus:border-blue-400"
             value={deadline_expire_time}
-            onChange={(e) => setDeadlineExpireTime(e.target.value)}
+            onChange={(e) => {
+              setDeadlineExpireTime(e.target.value);
+            }}
             required
           />
         </div>
-        <button type="submit" className="btn btn-primary">
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+        >
           Place Order
         </button>
       </form>

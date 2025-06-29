@@ -12,4 +12,12 @@ router.post('/logout', requireRiderLogin, riderController.logoutRider);
 
 router.post('/fetch-assignments',requireRiderLogin, riderController.fetchAssignments);
 
+router.get('/viewAssignment/:id', requireRiderLogin, riderController.viewAssignment);
+
+router.post('/submitPickupOtp', requireRiderLogin, riderController.submitPickupOtp);
+
+router.post('/generateDeliveryOtp', requireRiderLogin, riderController.generateDeliveryOtp);
+
+router.post('/submitDeliveryOtp', requireRiderLogin, riderController.submitDeliveryOtp);
+
 module.exports = router;
